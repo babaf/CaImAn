@@ -433,7 +433,8 @@ def evaluate_components_placeholder(params):
 
 def estimate_components_quality_auto(Y, A, C, b, f, YrA, frate, decay_time, gSig, dims, dview=None, min_SNR=2, r_values_min=0.9,
                                      r_values_lowest=-1, Npeaks=10, use_cnn=True, thresh_cnn_min=0.95, thresh_cnn_lowest=0.1,
-                                     thresh_fitness_delta=-20., min_std_reject=0.5):
+                                     thresh_fitness_delta=-20., min_std_reject=0.5,
+                                     model_name='use_cases/CaImAnpaper/cnn_model'):
     ''' estimates the quality of component automatically
 
     Parameters:
@@ -519,7 +520,7 @@ def estimate_components_quality_auto(Y, A, C, b, f, YrA, frate, decay_time, gSig
     idx_components = []
     if use_cnn:
         neuron_class = 1  # normally 1
-        predictions, _ = evaluate_components_CNN(A, dims, gSig)
+        predictions, _ = evaluate_components_CNN(A, dims, gSig, model_name)
         idx_components_cnn = np.where(
             predictions[:, neuron_class] >= thresh_cnn_min)[0]
         bad_comps = np.where((r_values <= r_values_lowest) | (fitness_raw >= thresh_fitness_raw_reject) | (
