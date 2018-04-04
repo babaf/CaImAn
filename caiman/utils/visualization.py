@@ -791,7 +791,14 @@ def view_patches_bar(Yr, A, C, b, f, d1, d2, YrA=None, img=None):
      img:   np.ndarray
                 background image for contour plotting. Default is the image of all spatial components (d1 x d2)
 
+    Returns:
+    --------
+    array of bools
+        For each component, to keep it or to reject it
+
     """
+    print("Press arrows left or right to navigate through components.")
+    print("Press 'r' to remove a component, and 'k' to reverse a removal.")
 
     pl.ion()
     if 'csc_matrix' not in str(type(A)):
@@ -800,6 +807,7 @@ def view_patches_bar(Yr, A, C, b, f, d1, d2, YrA=None, img=None):
         b = b.toarray()
 
     nr, T = C.shape
+    keep = np.ones(nr, dtype=bool)
     nb = f.shape[0]
     nA2 = np.sqrt(np.array(A.power(2).sum(axis=0))).squeeze()
 
@@ -832,13 +840,19 @@ def view_patches_bar(Yr, A, C, b, f, d1, d2, YrA=None, img=None):
             ax1.cla()
             imgtmp = np.reshape(A[:, i].toarray(), (d1, d2), order='F')
             ax1.imshow(imgtmp, interpolation='None', cmap=pl.cm.gray)
-            ax1.set_title('Spatial component ' + str(i + 1))
+            if keep[i]:
+                ax1.set_title('Spatial component ' + str(i + 1))
+            else:
+                ax1.set_title('Spatial component (Rejected) ' + str(i + 1))
             ax1.axis('off')
 
             ax2.cla()
             ax2.plot(np.arange(T), Y_r[i], 'c', linewidth=3)
             ax2.plot(np.arange(T), C[i], 'r', linewidth=2)
-            ax2.set_title('Temporal component ' + str(i + 1))
+            if keep[i]:
+                ax2.set_title('Temporal component ' + str(i + 1))
+            else:
+                ax2.set_title('Temporal component (Rejected)' + str(i + 1))
             ax2.legend(labels=['Filtered raw data', 'Inferred trace'])
 
             ax3.cla()
@@ -872,6 +886,17 @@ def view_patches_bar(Yr, A, C, b, f, d1, d2, YrA=None, img=None):
             if new_val > nr + nb:
                 new_val = nr + nb
             s_comp.set_val(new_val)
+
+        elif event.key == 'k':
+            '''This will set it so that the component is kept.'''
+            keep[s_comp.val] = True
+            s_comp.set_val(s_comp.val)
+
+        elif event.key == 'r':
+            '''This will set it so that the component is removed.'''
+            keep[s_comp.val] = False
+            s_comp.set_val(s_comp.val)
+
         else:
             pass
 
@@ -879,6 +904,7 @@ def view_patches_bar(Yr, A, C, b, f, d1, d2, YrA=None, img=None):
     s_comp.set_val(0)
     fig.canvas.mpl_connect('key_release_event', arrow_key_image_control)
     pl.show()
+    return keep
 #%%
 
 

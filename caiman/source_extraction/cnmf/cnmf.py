@@ -1120,6 +1120,11 @@ class CNMF(object):
          img :   np.ndarray
                  background image for contour plotting. Default is the mean image of all spatial components (d1 x d2)
 
+        Returns:
+        --------
+        array of bools
+            For each component, to keep it or to reject it
+
         """
         if 'csc_matrix' not in str(type(self.A)):
             self.A = scipy.sparse.csc_matrix(self.A)
@@ -1136,8 +1141,9 @@ class CNMF(object):
         if img is None:
             img = np.reshape(np.array(self.A.mean(axis=1)), dims, order='F')
 
-        caiman.utils.visualization.view_patches_bar(Yr, self.A, self.C, self.b, self.f, dims[
+        keep = caiman.utils.visualization.view_patches_bar(Yr, self.A, self.C, self.b, self.f, dims[
                                                     0], dims[1], YrA=self.YrA, img=img)
+        return keep
 
 
 def scale(y):
